@@ -102,149 +102,206 @@ class BST:
         traverse(self.root)
         print()
 
-    def kth_smallest(self, k):
-        def traverse(node):
-            nonlocal k
-            if not node:
-                return None
-            left = traverse(node.left)
-            if left is not None:
-                return left
-            k -= 1
-            if k == 0:
-                return node.value
-            return traverse(node.right)
+    
+    def kth_smallest(self,k):
+        stack = []
+        current = self.root
+        
+        while True:
+            while current:
+                stack.append(current)
+                current = current.left
+            current = stack.pop()
+            
+            k-= 1 
+            if k ==0 :
+                return current.value
+            
+            current = current.right
 
-        return traverse(self.root)
+    def kth_largest(self,k):
+        stack = []
+        current = self.root
+        
+        while True:
+            while current:
+                stack.append(current)
+                current = current.right
+            current = stack.pop()
+            
+            k-=1 
+            if k == 0 :
+                return current.value
+            
+            current = current.left
 
-    def kth_largest(self, k):
-        def traverse(node):
-            nonlocal k
-            if not node:
-                return None
-            right = traverse(node.right)
-            if right is not None:
-                return right
-            k -= 1
-            if k == 0:
-                return node.value
-            return traverse(node.left)
-
-        return traverse(self.root)
-
-    def closest_value(self, target):
-        def closest(node, closest_value):
-            if not node:
-                return closest_value
-            if abs(node.value - target) < abs(closest_value - target):
-                closest_value = node.value
-            if target < node.value:
-                return closest(node.left, closest_value)
-            elif target > node.value:
-                return closest(node.right, closest_value)
+    def  closest_value(self , target):
+        current = self.root
+        cloest_value = float('inf')
+        
+        while current:
+            if abs(current.value - target) < abs(cloest_value - target):
+                cloest_value = current.value
+            
+            if target < current.value:
+                current = current.left
+            elif target > current.value:
+                current = current.right
+            
             else:
-                return closest_value
-
-        return closest(self.root, self.root.value if self.root else float('inf'))
+                return current.value
+                
+        return cloest_value
+    
 
     def is_bst(self):
-        def validate(node, min_value, max_value):
-            if not node:  
-                return True
-            if not (min_value < node.value < max_value):  
+        current = self.root
+        stack = [(current , float('-inf') , float('inf'))]
+        
+        while stack:
+            node , min_value , max_val = stack.pop()
+            if not(min_value < node.value < max_val):
                 return False
             
-            return (validate(node.left, min_value, node.value) and
-                    validate(node.right, node.value, max_value))
+            if node.left:
+                stack.append((node.left , min_value , node.value))
+                
+            if node.right:
+                stack.append((node.right , node.value , max_val))
+                
+                
+        return True
 
-        return validate(self.root, float('-inf'), float('inf'))
-
-    # Additional Operations
 
     def depth(self):
-        def max_depth(node):
-            if not node:
-                return 0
-            left_depth = max_depth(node.left)
-            right_depth = max_depth(node.right)
-            return max(left_depth, right_depth) + 1
-
-        return max_depth(self.root)
+        if not self.root:
+            return 0 
+        
+        stack = [(self.root , 1)]
+        max_depth = 0
+        while stack:
+            node , depth = stack.pop()
+            
+            max_depth = max(max_depth , depth)
+            
+            if node.left:
+                stack.append((node.left , depth +1 ))
+            if node.right:
+                stack.append((node.right , depth +1 ))
+                
+        return max_depth
 
     def size(self):
-        def count_nodes(node):
-            if not node:
-                return 0
-            return 1 + count_nodes(node.left) + count_nodes(node.right)
+        stack = [self.root]
+        count = 0 
+        
+        while stack:
+            node = stack.pop()
+            count += 1 
+            
+            if node.left:
+                stack.append(node.left)
+                
+            if node.right:
+                stack.append(node.right)
+        return count
 
-        return count_nodes(self.root)
-
-    def level_order_traversal(self):
-        if not self.root:
-            return []
-
+    def BFS(self):
         result = []
         queue = deque([self.root])
         while queue:
             node = queue.popleft()
             result.append(node.value)
+            
             if node.left:
                 queue.append(node.left)
             if node.right:
                 queue.append(node.right)
-
-        print("Level-order Traversal:", result)
+                
         return result
 
     def is_balanced(self):
-        def check(node):
+        stack = [(self.root , False)]
+        hights = {}
+        
+        while stack:
+            node , visited = stack.pop()
             if not node:
-                return 0  # Height of an empty tree is 0
-
-            left = check(node.left)
-            right = check(node.right)
-
-            if left == -1 or right == -1 or abs(left - right) > 1:
-                return -1  # Unbalanced tree
-
-            return max(left, right) + 1  # Return height of subtree
-
-        return check(self.root) != -1
+                continue
+            
+            if visited:
+                
+                left_hight = hights.get(node.left , 0)
+                right_hight = hights.get(node.right , 0)
+                
+                if abs(left_hight - right_hight) > 1 :
+                    return False
+                
+                hights[node] = max(left_hight, right_hight) +1 
+                
+            else:
+                stack.append((node ,True))
+                stack.append((node.right , False))
+                stack.append((node.left, False))
+            
+        return True 
 
 
     def min_value(self):
-        if not self.root:
-            return None
-
         current = self.root
+            
         while current.left:
             current = current.left
         return current.value
-
+            
     def max_value(self):
-        if not self.root:
-            return None
-
         current = self.root
+            
         while current.right:
             current = current.right
         return current.value
     
     
 
-    def is_subtree(self, subtree_root):
-    # Helper function to serialize a tree
-        def serialize(node):
+    def is_subtree(self , subtree_root):
+        if not subtree_root:
+            return True
+        
+        if not self.root:
+            return False
+            
+        stack = [self.root]
+        
+        while stack:
+            node = stack.pop()
             if not node:
-                return "null"  # Represent null nodes as "null"
-            # Serialize the tree in pre-order (root, left, right)
-            return f"#{node.value} " + serialize(node.left) + " " + serialize(node.right)
-
-        # Serialize the main tree and the subtree
-        main_tree_serialized = serialize(self.root)
-        subtree_serialized = serialize(subtree_root)
-
-        return subtree_serialized in main_tree_serialized
+                continue
+                
+            if node.value == subtree_root.value and self.is_subtree_helper(node , subtree_root):
+                return True
+                
+            if node.left:
+                stack.append(node.left)
+            if node.right:
+                stack.append(node.right)
+                
+        return False
+        
+    def is_subtree_helper(self , node1 ,node2):
+        stack = [(node1 , node2)]
+        
+        while stack:
+            n1,n2 = stack.pop()
+            if not n1 and not n2:
+                continue
+            
+            if not n1 or not n2 or n1.value != n2.value:
+                return False
+                
+            stack.append((n1.left , n2.left))
+            stack.append((n1.right , n2.right))
+            
+        return True
 
     
 # Example Usage
@@ -273,7 +330,7 @@ print("Is the tree a valid BST?", bst.is_bst())
 # Testing additional operations
 print("Depth of the tree:", bst.depth())
 print("Size of the tree:", bst.size())
-bst.level_order_traversal()
+bst.BFS()
 print("Is the tree balanced?", bst.is_balanced())
 print("Minimum value in the tree:", bst.min_value())
 print("Maximum value in the tree:", bst.max_value())

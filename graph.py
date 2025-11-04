@@ -70,27 +70,27 @@ class Graph:
             if vertex not in visited:
                 print(vertex, end=" ")
                 visited.add(vertex)
-                if self.weighted:
-                    for neighbor in self.graph[vertex]:
+                
+                for neighbor in self.graph[vertex]:
+                    if neighbor not in visited:
                         queue.append(neighbor)
-                else:
-                    for neighbor in self.graph[vertex]:
-                        queue.append(neighbor)
+                
 
 
-    def dfs(self, start, visited=None):
-        if visited is None:
-            visited = set()
-        visited.add(start)
-        print(start, end=" ")
-        if self.weighted:
-            for neighbor in self.graph[start]:
-                if neighbor not in visited:
-                    self.dfs(neighbor, visited)
-        else:
-            for neighbor in self.graph[start]:
-                if neighbor not in visited:
-                    self.dfs(neighbor, visited)
+    def dfs_iterative(self, start):
+        visited = set()
+        stack = [start]
+
+        while stack:
+            vertex = stack.pop()
+            if vertex not in visited:
+                print(vertex, end=" ")
+                visited.add(vertex)
+
+                for neighbor in reversed(self.graph[vertex]):
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+
 
     # Check if the graph is finite
     def is_finite(self):

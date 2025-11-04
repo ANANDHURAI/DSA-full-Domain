@@ -54,8 +54,12 @@ class BST:
         elif data > current.value:
             current.right = self._delete(current.right, data)
         else:
+            if not current.left and not current.right:
+                return None
+            
             if not current.left:
                 return current.right
+            
             if not current.right:
                 return current.left
 

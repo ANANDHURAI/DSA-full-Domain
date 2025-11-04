@@ -164,29 +164,25 @@ class Graph:
 
     # Check if the graph is cyclic (contains at least one cycle)
     def is_cyclic(self):
-        def dfs(vertex, visited, rec_stack):
-            visited.add(vertex)
-            rec_stack.add(vertex)
-
-            for neighbor in self.graph[vertex]:  # Traverse all neighbors
-                if neighbor not in visited:
-                    if dfs(neighbor, visited, rec_stack):  # Recursively visit
-                        return True
-                elif neighbor in rec_stack:  # Cycle detected
-                    return True
-
-            rec_stack.remove(vertex)  # Remove from recursion stack after processing
-            return False
-
         visited = set()
-        rec_stack = set()
-        
-        for vertex in self.graph:
-            if vertex not in visited:
-                if dfs(vertex, visited, rec_stack):
-                    return True  # Cycle found
-                    
-        return False  # No cycle detected
+
+        for start in self.graph:
+            if start not in visited:
+                stack = [(start, None)]  # (current_node, parent)
+                while stack:
+                    vertex, parent = stack.pop()
+
+                    if vertex in visited:
+                        return True  # cycle found
+
+                    visited.add(vertex)
+
+                    for neighbor in self.graph[vertex]:
+                        if neighbor != parent:  # avoid going back to parent
+                            stack.append((neighbor, vertex))
+
+        return False
+
 
 
     # Check if the graph is acyclic (contains no cycles)
@@ -199,24 +195,19 @@ class Graph:
 
     # Check if the graph is a subgraph of another graph
     def is_subgraph(self, other_graph):
+
         for vertex in other_graph.graph:
             if vertex not in self.graph:
-                return False  # Missing vertex
-
-            main_neighbors = self.graph[vertex]
-            sub_neighbors = other_graph.graph[vertex]
-
-            # Check weighted graph (dictionary)
-            if isinstance(sub_neighbors, dict):
-                for neighbor, weight in sub_neighbors.items():
-                    if main_neighbors.get(neighbor) != weight:
-                        return False
-            
-            # Check unweighted graph (list or set)
-            elif any(neighbor not in main_neighbors for neighbor in sub_neighbors):
                 return False
-
+            
+            # Check each neighbor of this vertex
+            for neighbor in other_graph.graph[vertex]:
+                if neighbor not in self.graph[vertex]:
+                    return False  # A required edge is missing
+        
+        # If all vertices and edges exist
         return True
+
 
 
     # Check if the graph is weighted

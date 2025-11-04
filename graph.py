@@ -77,7 +77,7 @@ class Graph:
                 
 
 
-    def dfs_iterative(self, start):
+    def dfs(self, start):
         visited = set()
         stack = [start]
 

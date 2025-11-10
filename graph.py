@@ -165,22 +165,31 @@ class Graph:
     # Check if the graph is cyclic (contains at least one cycle)
     def is_cyclic(self):
         visited = set()
+        parent_map = {}  # store parent of each node
 
         for start in self.graph:
             if start not in visited:
-                stack = [(start, None)]  # (current_node, parent)
+                stack = [(start, None)]
                 while stack:
                     vertex, parent = stack.pop()
 
                     if vertex in visited:
-                        return True  # cycle found
+                        # Cycle detected — reconstruct path
+                        cycle_path = [vertex]
+                        p = parent_map.get(vertex)
+                        while p and p != vertex:
+                            cycle_path.append(p)
+                            p = parent_map.get(p)
+                        cycle_path.reverse()
+                        print("Cycle detected:", " -> ".join(cycle_path))
+                        return True
 
                     visited.add(vertex)
+                    parent_map[vertex] = parent
 
                     for neighbor in self.graph[vertex]:
-                        if neighbor != parent:  # avoid going back to parent
+                        if neighbor != parent:
                             stack.append((neighbor, vertex))
-
         return False
 
 
